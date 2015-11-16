@@ -1,0 +1,224 @@
+a<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="css/core.css">
+
+</head>
+<body>
+	<div class = "theGameBoard">
+		<canvas id = "myCanvas" width = "1200" height = "700" style = "border:1px solid #000000;"></canvas>
+		
+		<div class="scoreBoard">
+			<h1>Score: </h1>
+		</div>
+
+
+	</div>
+
+	<div class="background-pic"></div>
+
+
+	<script>
+
+
+//GET THE CONTEXT OF THE CANVAS
+
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+
+// INITIALIZE GAME VARIABLES
+
+		var gameVariables = {
+			offSetX: 10,
+			offSetY: 10
+		};
+
+		var keyStates = {
+			LEFT: 37,
+			RIGHT: 39,
+			UP: 38,
+			DOWN: 40,
+			SPACE: 32
+		};
+
+		var soundCue = new Audio("assets/beep-03.mp3");
+
+// WRITE THE PLAYER OBJECTS -> BLUEPRINT
+
+		var myPaddle = {
+			positionX: 500,
+			positionY: 630,
+			width: 200,
+			height: 50,
+			color: "pink"
+		};
+
+
+// CREATE THE PLAYER OBJECTS
+
+		var circleOne = new CCircle(50, 100, 100);
+
+				function CCircle(radius, x, y) {
+			this.positionX = x;
+			this.positionY = y;
+			this.radius = radius;
+			var speed = 5.0;
+			var directionX = Math.random();
+			var directionY = Math.random();
+
+			this.draw = function() {
+				ctx.beginPath();
+				ctx.fillStyle="#FFFFE5";
+				ctx.arc(this.positionX, this.positionY, this.radius, 0, 2*Math.PI);
+				ctx.fill();
+			}
+			this.move = function() {
+				this.positionX += speed*directionX;
+				this.positionY += speed*directionY;
+
+				//Bivas Comments
+				//Get the Hit Trace
+				var hitResult = checkIfHittingWall(this, this.radius, this.radius);
+
+				if (hitResult) {
+					//Bivas Comments
+					//if there is collision, do some clean up work
+
+					this.positionX -= speed*directionX;
+					this.positionY -= speed*directionY;
+
+					//Bivas Comments
+					//If you just flip both the directions when there is a hit, then the ball will always travel at 45 degrees
+					//identify the trace channel. If it was from X, just flip the x direction, if Y, then flip the Y direction
+					//For this I have broken up the hit results into returning 3 different values. O (No Hit), 1 -> Hit on X, 2 -> Hit on Y
+					
+					// soundCue.play();
+
+					if(hitResult == 1)
+						directionX *= -1.0;
+
+					if(hitResult == 2)
+						directionY *= -1.0;
+				}
+			}
+		};
+
+// INITIALIZE GAME STATE (Initialize Players, reset Score, clear canvas)
+
+		document.addEventListener('keydown', onkeydown, false);
+
+
+
+// ENTER GAME LOOP - 60 FPS
+		gameLoop();
+
+		function gameLoop() {
+			requestAnimationFrame(gameLoop);
+			render();
+		}
+
+
+// {
+	
+// 	UPDATE GAME OBJECTS (GETS YOU THE NEW POSITION & ALSO OTHER MATERIAL STATES)
+// 	{
+// 		1. CALL AI FUNCTIONS
+// 		2. CHECK USER INPUT 
+// 		3. DO COLIISIONS
+		
+// 	}
+
+
+		function moveLocation(target, deltaX, deltaY) {
+			target.positionX += deltaX; 
+			target.positionY += deltaY;
+			var width;
+			var height;
+
+			if (target instanceof CCircle) {
+				width = target.radius;
+				height = target.radius;
+			}
+			else {
+				width = myPaddle.width;
+				height = myPaddle.height;
+			}
+
+			if (checkIfHittingWall(target, width, height) === true) {
+				target.positionX -= deltaX; 
+				target.positionY -= deltaY;
+			}
+		}
+
+		function checkIfHittingWall (target, width, height) {
+
+			var left;
+			var top;
+			var hit = 0;
+
+			if (target instanceof CCircle) {
+				left = target.positionX - target.radius;
+				top = target.positionY - target.radius;
+			}
+
+			else {
+				left = target.positionX;
+				top = target.positionY;
+			}
+
+			//Bivas Comments
+			//Break the Hit Results to identify X and Y collision - X returns 1, Y returns 2 
+			if ((left < canvas.offsetLeft) || (target.positionX > (canvas.offsetWidth - width))) 
+			{
+				hit = 1;
+			}
+			if ((top < canvas.offsetTop) || (target.positionY > (canvas.offsetHeight - height))) {
+				hit = 2;
+			}
+			return hit;
+		}
+
+		function onkeydown(evt) {
+
+				 switch (evt.keyCode) {
+
+				 	case keyStates.LEFT:
+				 		moveLocation(myPaddle, -gameVariables.offSetX, 0);
+				 	break; 
+
+				 	case keyStates.RIGHT:
+				 		moveLocation(myPaddle, gameVariables.offSetX, 0);
+				 	break;
+
+				 	case keyStates.SPACE:
+				 	break;
+
+				 	default: 
+				 	break;	
+
+				 }
+
+		 }
+
+		 // When distance between center of circle and center of paddle is less than (?) there is a collsion and move location activated (add another hit =3?)
+// 	RENDER GAME OBJECTS
+
+		function render() {
+			circleOne.move();
+			// circleOne.changeDirection();
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			circleOne.draw();
+			ctx.beginPath();
+			ctx.fillStyle = myPaddle.color;				
+			ctx.fillRect(myPaddle.positionX, myPaddle.positionY, myPaddle.width, myPaddle.height);
+			ctx.fill();
+		}
+
+// }
+
+
+
+	</script>
+
+</body>
+</html>
