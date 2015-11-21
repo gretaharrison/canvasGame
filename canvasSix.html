@@ -79,6 +79,10 @@ a<html>
 				//Bivas Comments
 				//Get the Hit Trace
 				var hitResult = checkIfHittingWall(this, this.radius, this.radius);
+				var collisionResult = checkCollision(myPaddle, this);
+				if (collisionResult) {
+					directionY *= -1.0;
+				}
 
 				if (hitResult) {
 					//Bivas Comments
@@ -175,8 +179,28 @@ a<html>
 			if ((top < canvas.offsetTop) || (target.positionY > (canvas.offsetHeight - height))) {
 				hit = 2;
 			}
+
 			return hit;
 		}
+
+		function checkCollision(myPaddle, circleOne) {
+
+			var leftVertical = myPaddle.positionX;
+			var rightVertical = myPaddle.positionX + myPaddle.width;
+			var topHorizontal = circleOne.positionY;
+			var result = false;
+
+			if (circleOne.positionX < rightVertical && circleOne.positionX > leftVertical) {
+
+				if ((topHorizontal + circleOne.radius) > myPaddle.positionY) {
+
+					result = true;
+				}
+			}
+
+			return result;
+		}
+
 
 		function onkeydown(evt) {
 

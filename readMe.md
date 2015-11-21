@@ -34,3 +34,11 @@ Also, don't spawn a new sound everytime the ball hits the walls (memory leak) . 
 
 - Break point on render 
 - jump into function
+//
+So just to recap your homework - 
+
+Do the collision check with the ball 
+Update Score 
+Program the Game Over condition 
+
+That should be it for this game ! 
